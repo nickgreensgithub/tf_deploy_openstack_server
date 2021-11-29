@@ -41,6 +41,10 @@ variable "security_groups" {
     default = ["default"]
 }
 
+variable "volumes" {
+    default = []
+}
+
 variable "create_user"{ 
     type = map
 }
@@ -66,6 +70,13 @@ resource "openstack_compute_instance_v2" "server" {
     }
 }
 
+#Will only mount on the first machine for now, all I need at this point
+resource "openstack_compute_volume_attach_v2" "volumes" {
+    for_each          = var.volumes 
+    instance_id = openstack_compute_instance_v2.server[0].id
+    volume_id = each.value.id
+}
+
 #TODO check if this gets called for all machines
 #resource "null_resource" "further_configuration" {
     #count = var.number_of_machines
@@ -74,17 +85,17 @@ resource "openstack_compute_instance_v2" "server" {
     #     vm_ids = join(",", openstack_compute_instance_v2.server.*.id)
     # }
 
-    module "create_ansible_user"{
-        vm_ids =  openstack_compute_instance_v2.server.*.id
-        source="github.com/nickgreensgithub/tf_module_create_remote_user"
-        connection = {
-                ip = openstack_compute_instance_v2.server.*.network.0.fixed_ip_v4[0]
-                user= var.vm_connection_details.user
-                private_key = var.vm_connection_details.priv
-        }
-        user = {
-                name = "${ var.create_user.user }"
-                is_sudo = true
-                public_ssh="${ var.create_user.pub }"
-        }
+module "create_ansible_user"{
+    vm_ids =  openstack_compute_instance_v2.server.*.id
+    source="github.com/nickgreensgithub/tf_module_create_remote_user"
+    connection = {
+            ip = openstack_compute_instance_v2.server.*.network.0.fixed_ip_v4[0]
+            user= var.vm_connection_details.user
+            private_key = var.vm_connection_details.priv
     }
+    user = {
+            name = "${ var.create_user.user }"
+            is_sudo = true
+            public_ssh="${ var.create_user.pub }"
+    }
+}
