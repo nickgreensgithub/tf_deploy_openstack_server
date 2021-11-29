@@ -15,10 +15,8 @@ provider "openstack" {
     cloud = "openstack"
 }
 
-#TODO move to the calling file
 variable "keypair" {
     type    = string
-    default = "nick_aau"
 }
 
 variable "name_suffix" {
@@ -36,7 +34,6 @@ variable "number_of_machines" {
 
 variable "network" {
     type    = string
-    default = "Campus Network 01"
 }
 
 variable "security_groups" {
