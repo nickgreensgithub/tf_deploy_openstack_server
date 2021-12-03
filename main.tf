@@ -42,7 +42,7 @@ variable "security_groups" {
 }
 
 variable "volumes" {
-    default = []
+    default = {}
 }
 
 variable "create_user"{ 
