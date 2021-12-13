@@ -57,7 +57,7 @@ variable "flavour"{}
 
 variable "cloud"{
     type    = string
-    default = "openstak"
+    default = "openstack"
 }
 
 # Create an instance
