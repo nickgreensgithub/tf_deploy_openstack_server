@@ -55,6 +55,11 @@ variable "vm_connection_details"{
 variable "image"{}
 variable "flavour"{}
 
+variable "cloud"{
+    type    = string
+    default = "openstak"
+}
+
 # Create an instance
 resource "openstack_compute_instance_v2" "server" {
     count = var.number_of_machines
@@ -63,6 +68,7 @@ resource "openstack_compute_instance_v2" "server" {
     flavor_name = var.flavour
     key_pair        = var.keypair
     security_groups = var.security_groups
+    cloud = var.cloud
 
     network {
         name = var.network
