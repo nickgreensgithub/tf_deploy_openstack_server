@@ -69,7 +69,6 @@ resource "openstack_compute_instance_v2" "server" {
     key_pair        = var.keypair
     security_groups = var.security_groups
 
-
     network {
         name = var.network
         access_network = true
@@ -83,19 +82,13 @@ resource "openstack_compute_volume_attach_v2" "volumes" {
     volume_id = each.value.id
 }
 
-#TODO check if this gets called for all machines
-#resource "null_resource" "further_configuration" {
-    #count = var.number_of_machines
-
-    # triggers = {
-    #     vm_ids = join(",", openstack_compute_instance_v2.server.*.id)
-    # }
-
 module "create_ansible_user"{
-    vm_ids =  openstack_compute_instance_v2.server.*.id
+    depends_on = [ openstack_compute_instance_v2.server ]
+    count      = length( openstack_compute_instance_v2.server )
     source="github.com/nickgreensgithub/tf_module_create_remote_user"
+
     connection = {
-            ip = openstack_compute_instance_v2.server.*.network.0.fixed_ip_v4[0]
+            ip = openstack_compute_instance_v2.server[count.index].network.0.fixed_ip_v4
             user= var.vm_connection_details.user
             private_key = var.vm_connection_details.priv
     }
