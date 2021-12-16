@@ -57,14 +57,23 @@ variable "create_user"{
 variable "vm_connection_details"{
     type = map
 }
-variable "image"{}
+
+variable "image_id"{
+    type = string
+}
+
+variable "root_volume_size"{
+    type = number
+    default = 100
+}
+
 variable "flavour"{}
 
 # Create an instance
 resource "openstack_compute_instance_v2" "server" {
     count = var.number_of_machines
     name            = "${var.name_prefix}_${var.name_suffix}_${count.index}"
-    image_name  = var.image
+    image_name  = var.image_id
     flavor_name = var.flavour
     key_pair        = var.keypair
     security_groups = var.security_groups
@@ -73,6 +82,16 @@ resource "openstack_compute_instance_v2" "server" {
         name = var.network
         access_network = true
     }
+
+    block_device {
+        uuid                  = var.image_id
+        source_type           = "image"
+        volume_size           = var.root_volume_size
+        boot_index            = 0
+        destination_type      = "volume"
+        delete_on_termination = true
+    }
+
 }
 
 #Will only mount on the first machine for now, all I need at this point
