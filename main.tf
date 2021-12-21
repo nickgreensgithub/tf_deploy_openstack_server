@@ -94,7 +94,7 @@ resource "openstack_compute_instance_v2" "server" {
 
 }
 
-#Will only mount on the first machine for now, all I need at this point
+#Will only mount on the first machine for now, but that's all I need at this point anyway
 resource "openstack_compute_volume_attach_v2" "volumes" {
     for_each          = var.volumes 
     instance_id = openstack_compute_instance_v2.server[0].id
@@ -103,8 +103,8 @@ resource "openstack_compute_volume_attach_v2" "volumes" {
 
 module "create_ansible_user"{
     depends_on = [ openstack_compute_instance_v2.server ]
-    count      = length( openstack_compute_instance_v2.server )
-    source="github.com/nickgreensgithub/tf_module_create_remote_user"
+    count      = length( openstack_compute_instance_v2.server)
+    source= "github.com/nickgreensgithub/tf_module_create_remote_user"
 
     connection = {
             ip = openstack_compute_instance_v2.server[count.index].network.0.fixed_ip_v4
